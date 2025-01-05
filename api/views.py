@@ -62,7 +62,7 @@ class PDFDetailView(generics.RetrieveDestroyAPIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        
+
 @api_view(['POST'])
 def rotate_image(request):
     image_id = request.data.get('id')
@@ -75,3 +75,30 @@ def rotate_image(request):
         return Response({"message": "Image rotated successfully."}, status=status.HTTP_200_OK)
     except UploadedImage.DoesNotExist:
         return Response({"error": "Image not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+def convert_pdf_to_image(request):
+    pdf_id = request.data.get('id')
+    try:
+        pdf = UploadedPDF.objects.get(id=pdf_id)
+        images = convert_from_path(pdf.file.path)
+        output_paths = []
+
+        # Define the output directory inside the MEDIA folder
+        output_dir = os.path.join(settings.MEDIA_ROOT, 'converted_pdf')
+        os.makedirs(output_dir, exist_ok=True)  # Ensure the directory exists
+
+        for i, img in enumerate(images):
+            output_path = os.path.join(output_dir, f"{pdf_id}_page_{i+1}.jpg")
+            img.save(output_path, 'JPEG')
+            # Convert to relative URL for client usage
+            relative_path = os.path.relpath(output_path, settings.MEDIA_ROOT)
+            output_paths.append(os.path.join(settings.MEDIA_URL, relative_path))
+
+        return Response({"images": output_paths}, status=status.HTTP_200_OK)
+    except UploadedPDF.DoesNotExist:
+        return Response({"error": "PDF not found."}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

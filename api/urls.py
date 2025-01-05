@@ -8,7 +8,7 @@ from django.urls import path
 
 # Imports from your apps
 from .views import (
-    upload_file, ImageListView, PDFListView, ImageDetailView, PDFDetailView, rotate_image
+    upload_file, ImageListView, PDFListView, ImageDetailView, PDFDetailView, rotate_image, convert_pdf_to_image
 )
 
 urlpatterns = [
@@ -18,6 +18,7 @@ urlpatterns = [
     path('images/<int:pk>/', ImageDetailView.as_view(), name='image-detail'),
     path('pdfs/<int:pk>/', PDFDetailView.as_view(), name='pdf-detail'),
     path('rotate/', rotate_image, name='rotate-image'),
+    path('convert-pdf-to-image/', convert_pdf_to_image, name='convert-pdf-to-image'),
 
 
 ]
