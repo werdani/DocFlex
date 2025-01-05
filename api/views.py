@@ -1,3 +1,31 @@
-from django.shortcuts import render
+# Imports standard libraries
+from PIL import Image
+from pdf2image import convert_from_path
+import os
+from django.conf import settings
 
-# Create your views here.
+# Imports core Django libraries
+from rest_framework import generics, status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+# Imports third-party libraries
+##..
+
+# Imports from your apps
+from .models import UploadedImage, UploadedPDF
+from .serializers import UploadedImageSerializer, UploadedPDFSerializer
+
+
+@api_view(['POST'])
+def upload_file(request):
+    file = request.FILES.get('file')
+    print(file.content_type)
+    if file.content_type.startswith('image'):
+        instance = UploadedImage.objects.create(file=file)
+        return Response(UploadedImageSerializer(instance).data, status=status.HTTP_201_CREATED)
+    elif file.content_type == 'application/pdf':
+        # print(file.content_type)
+        instance = UploadedPDF.objects.create(file=file)
+        return Response(UploadedPDFSerializer(instance).data, status=status.HTTP_201_CREATED)
+    return Response({"error": "Unsupported file type."}, status=status.HTTP_400_BAD_REQUEST)
