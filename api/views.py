@@ -61,3 +61,17 @@ class PDFDetailView(generics.RetrieveDestroyAPIView):
             return Response(metadata, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        
+@api_view(['POST'])
+def rotate_image(request):
+    image_id = request.data.get('id')
+    angle = request.data.get('angle')
+    try:
+        image = UploadedImage.objects.get(id=image_id)
+        with Image.open(image.file.path) as img:
+            rotated = img.rotate(angle, expand=True)
+            rotated.save(image.file.path)
+        return Response({"message": "Image rotated successfully."}, status=status.HTTP_200_OK)
+    except UploadedImage.DoesNotExist:
+        return Response({"error": "Image not found."}, status=status.HTTP_404_NOT_FOUND)
