@@ -50,3 +50,14 @@ class ImageDetailView(generics.RetrieveDestroyAPIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+class PDFDetailView(generics.RetrieveDestroyAPIView):
+    queryset = UploadedPDF.objects.all()
+    serializer_class = UploadedPDFSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            metadata = instance.get_metadata()
+            return Response(metadata, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
