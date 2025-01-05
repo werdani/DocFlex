@@ -37,3 +37,16 @@ class ImageListView(generics.ListAPIView):
 class PDFListView(generics.ListAPIView):
     queryset = UploadedPDF.objects.all()
     serializer_class = UploadedPDFSerializer
+
+class ImageDetailView(generics.RetrieveDestroyAPIView):
+    queryset = UploadedImage.objects.all()
+    serializer_class = UploadedImageSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            metadata = instance.get_metadata()
+            return Response(metadata, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
