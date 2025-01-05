@@ -29,3 +29,11 @@ def upload_file(request):
         instance = UploadedPDF.objects.create(file=file)
         return Response(UploadedPDFSerializer(instance).data, status=status.HTTP_201_CREATED)
     return Response({"error": "Unsupported file type."}, status=status.HTTP_400_BAD_REQUEST)
+
+class ImageListView(generics.ListAPIView):
+    queryset = UploadedImage.objects.all()
+    serializer_class = UploadedImageSerializer
+
+class PDFListView(generics.ListAPIView):
+    queryset = UploadedPDF.objects.all()
+    serializer_class = UploadedPDFSerializer
