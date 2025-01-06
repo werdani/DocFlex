@@ -20,7 +20,7 @@ SECRET_KEY = 'django-insecure-i)9mjj)s=%z^bt4p+9z3@ib66@fe0h%yy!8!0o&s_%bp=9yx-#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['docuflex.pythonanywhere.com', '127.0.0.1', 'localhost']
 
 
 # Application definition
