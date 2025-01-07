@@ -19,17 +19,24 @@ from .serializers import UploadedImageSerializer, UploadedPDFSerializer
 
 @api_view(['POST'])
 def upload_file(request):
+    # Check if a file was uploaded
     file = request.FILES.get('file')
-    print(file.content_type)
-    if file.content_type.startswith('image'):
-        instance = UploadedImage.objects.create(file=file)
-        return Response(UploadedImageSerializer(instance).data, status=status.HTTP_201_CREATED)
-    elif file.content_type == 'application/pdf':
-        # print(file.content_type)
-        instance = UploadedPDF.objects.create(file=file)
-        return Response(UploadedPDFSerializer(instance).data, status=status.HTTP_201_CREATED)
-    return Response({"error": "Unsupported file type."}, status=status.HTTP_400_BAD_REQUEST)
 
+    if not file:
+        return Response({"error": "No file uploaded."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        if file.content_type.startswith('image'):
+            instance = UploadedImage.objects.create(file=file)
+            return Response(UploadedImageSerializer(instance).data, status=status.HTTP_201_CREATED)
+        elif file.content_type == 'application/pdf':
+            instance = UploadedPDF.objects.create(file=file)
+            return Response(UploadedPDFSerializer(instance).data, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"error": "Unsupported file type."}, status=status.HTTP_400_BAD_REQUEST)
+    except AttributeError:
+        return Response({"error": "Invalid file format."}, status=status.HTTP_400_BAD_REQUEST)
+    
 class ImageListView(generics.ListAPIView):
     queryset = UploadedImage.objects.all()
     serializer_class = UploadedImageSerializer
