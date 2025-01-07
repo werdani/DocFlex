@@ -4,7 +4,7 @@
 from django.db import models
 
 # Imports third-party libraries
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from PyPDF2 import PdfReader
 # Imports from your apps
 ##..
@@ -17,13 +17,21 @@ class UploadedImage(models.Model):
         return f'{self.id}.image'
     
     def get_metadata(self):
-        with Image.open(self.file.path) as img:
-            return {
-                "location": self.file.path,
-                "width": img.width,
-                "height": img.height,
-                "channels": len(img.getbands())
-            }
+        if not self.file or not self.file.path:
+            raise Exception("Image file is missing or inaccessible")
+
+        try:
+            with Image.open(self.file.path) as img:
+                return {
+                    "location": self.file.path,
+                    "width": img.width,
+                    "height": img.height,
+                    "channels": len(img.getbands())
+                }
+        except FileNotFoundError:
+            raise Exception("Image file does not exist")
+        except UnidentifiedImageError:
+            raise Exception("cannot identify image file")
 
 class UploadedPDF(models.Model):
     file = models.FileField(upload_to='uploads/pdfs/')
