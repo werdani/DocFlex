@@ -30,4 +30,4 @@ class TestUploadFile(TestCase):
         response = self.client.post(self.url, {})
         self.assertEqual(response.status_code, 400)
         self.assertIn("error", response.data)
-        self.assertEqual(response.data["error"], "No file uploaded")  
+        self.assertEqual(response.data["error"], "No file uploaded.")  # Updated to match the period
