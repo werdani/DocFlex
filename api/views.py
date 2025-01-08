@@ -74,14 +74,31 @@ class PDFDetailView(generics.RetrieveDestroyAPIView):
 def rotate_image(request):
     image_id = request.data.get('id')
     angle = request.data.get('angle')
+
+    # Validate that 'id' is provided
+    if not image_id:
+        return Response({"error": "Image ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Ensure the angle is a valid integer
+    try:
+        angle = int(angle)
+    except (ValueError, TypeError):
+        return Response({"error": "Angle must be a valid integer."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Try to get the image from the database
     try:
         image = UploadedImage.objects.get(id=image_id)
-        with Image.open(image.file.path) as img:
-            rotated = img.rotate(angle, expand=True)
-            rotated.save(image.file.path)
-        return Response({"message": "Image rotated successfully."}, status=status.HTTP_200_OK)
     except UploadedImage.DoesNotExist:
         return Response({"error": "Image not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    # Try to open the image and rotate it
+    try:
+        img = Image.open(image.file.path)
+        img = img.rotate(angle)
+        img.save(image.file.path)  # You can save it to a different location or handle it differently if needed
+        return Response({"message": "Image rotated successfully."}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
