@@ -7,10 +7,15 @@ ENV PYTHONUNBUFFERED 1
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy the requirements file and install dependencies
-COPY requirements.txt /app/
+# Install system dependencies, including Poppler
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    poppler-utils \
+    && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
+# Copy the requirements file and install Python dependencies
+COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the project files into the container
